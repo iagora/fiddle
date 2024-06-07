@@ -11,7 +11,8 @@ O projeto ainda está em desenvolvimento:
 - [x] Gerar dígitos verificadores.
 - [x] Fazer o hash, e jogá-lo pra stdout.
 - [ ] Criar interface cli, ao invés de apenas receber stdin.
-- [ ] Criar man, e help.
+- [ ] Opção de algoritmo de hash e comprimento.
+- [ ] Busca reversa, a partir de um hash, encontre um CPF.
 
 ## 💻 Pré-requisitos
 

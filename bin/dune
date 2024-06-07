@@ -1,0 +1,4 @@
+(executable
+ (public_name fiddle)
+ (name main)
+ (libraries lib cryptokit core))
