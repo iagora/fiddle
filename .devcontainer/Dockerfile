@@ -23,6 +23,7 @@ RUN opam update && \
   ocamlformat \
   utop \
   core \
+  core_unix \
   cryptokit
 
 # Switch back to dialog for any ad-hoc use of apt-get
