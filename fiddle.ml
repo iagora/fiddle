@@ -28,8 +28,8 @@ let hash_and_print_cpf cpf_str =
   let hash = Hash.blake2b512 () in
   let digest = hash#add_string cpf_str; hash#result in
   let hex_encoded = transform_string (Hexa.encode ()) digest in
-  let base64_encoded = transform_string (Base64.encode_compact ()) digest in
-  Printf.printf "%s\tBlake2b: %s:%s\n" cpf_str hex_encoded base64_encoded
+  (* let base64_encoded = transform_string (Base64.encode_compact ()) digest in *)
+  Printf.printf "%s\t%s\n" cpf_str hex_encoded (* base64_encoded *)
 
 
 let calculate_a_cpf number () =

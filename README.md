@@ -36,7 +36,11 @@ Teste123:
 ```
 echo 123456789 | ./fiddle > rainbow_table.txt
 ```
-O resultado deve ser 123456789-09
+O resultado deve ser:
+
+```
+123456789-09    afa3f197d6d9bc55b26d0827aae1d64e651a2014f434d0de31ab33b906a1da4547b38ebc226c241b6852272f9bbf1a0c1d0eb3ea8438e37534f351de07a70d75
+```
 
 Inferninho não comprimido:
 ```
