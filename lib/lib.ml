@@ -26,13 +26,32 @@ let cpf_list_to_string cpf_digits (d1, d2) =
   |> fun base_str -> Printf.sprintf "%s-%d%d" base_str d1 d2
 
 (* Hash the CPF using Blake2b and print both hex and base64 encodings *)
-let hash_and_print_cpf cpf_str =
-  let hash = Hash.blake2b512 () in
-  let digest = hash#add_string cpf_str; hash#result in
+let hash_and_print_cpf cpf_str hash_algorithm digest_length  =
+  let hash_function =
+      match hash_algorithm with
+      | "sha3" -> Hash.sha3 digest_length
+      | "keccak" -> Hash.keccak digest_length
+      | "sha2" -> Hash.sha2 digest_length
+      | "sha224" -> Hash.sha224 ()
+      | "sha256" -> Hash.sha256 ()
+      | "sha384" -> Hash.sha384 ()
+      | "sha512" -> Hash.sha512 ()
+      | "blake2b" -> Hash.blake2b digest_length
+      | "blake2b512" -> Hash.blake2b512 ()
+      | "blake2s" -> Hash.blake2s digest_length
+      | "blake2s256" -> Hash.blake2s256 ()
+      | "blake3" -> Hash.blake3 digest_length
+      | "blake3_256" -> Hash.blake3_256 ()
+      | "ripemd160" -> Hash.ripemd160 ()
+      | "sha1" -> Hash.sha1 ()
+      | "md5" -> Hash.md5 ()
+      | _ -> failwith "Unsupported hash algorithm"
+  in
+  let digest = hash_function#add_string cpf_str; hash_function#result in
   let hex_encoded = transform_string (Hexa.encode ()) digest in
   printf "%s\t%s\n" cpf_str hex_encoded 
 
-let calculate_a_cpf number =
+let calculate_a_cpf number hash_algorithm digest_length =
   let int_to_cpf_array n =
     Printf.sprintf "%09d" n
     |> String.to_list
@@ -41,4 +60,4 @@ let calculate_a_cpf number =
   let cpf_base = int_to_cpf_array number in
   let digits = calculate_cpf_digits cpf_base in
   let cpf_str = cpf_list_to_string cpf_base digits in
-    hash_and_print_cpf cpf_str
+    hash_and_print_cpf cpf_str hash_algorithm digest_length

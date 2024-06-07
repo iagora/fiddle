@@ -2,7 +2,7 @@
 
 <img src="image.png" alt="Fiddle logo">
 
-> Fiddle é produto do meu tédio. No momento é só um programa besta em OCaml pra pegar números que sejam possíveis CPFs, calcular os dígitos verificadores corretos, e calcular o hash do CPF. Como se fosse uma Rainbow Table de CPFs. Não é exatamente útil. 
+> Fiddle é produto do meu tédio e um trabalho em progresso. Eu não vou manter o README atualizado no momento, porque eu to correndo atrás das features, e como está muito na infância, o branch main é onde se desenvolve também. Fiddle no momento é só um programa besta em OCaml pra pegar números que sejam possíveis CPFs, calcular os dígitos verificadores corretos, e calcular o hash do CPF. Como se fosse uma Rainbow Table de CPFs. Não é exatamente útil. 
 
 ### Ajustes e melhorias
 
