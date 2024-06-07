@@ -18,14 +18,14 @@ O projeto ainda está em desenvolvimento:
 
 Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
-- `opam 4.13 / Cryptokit `
+- `opam 4.13 / Cryptokit / Core`
 
 ## 🚀 Compilando Fiddle
 
-Para compilar o Fiddle, siga estas etapas:
+Para rodar o Fiddle, siga estas etapas:
 
 ```
-ocamlfind ocamlopt -package cryptokit -linkpkg fiddle.ml -o fiddle
+dune exec fiddle
 ```
 
 
@@ -35,7 +35,7 @@ Para usar Fiddle, siga estas etapas:
 
 Teste123:
 ```
-echo 123456789 | ./fiddle > rainbow_table.txt
+echo 123456789 | dune exec fiddle > rainbow_table.txt
 ```
 O resultado deve ser:
 
@@ -45,7 +45,7 @@ O resultado deve ser:
 
 Inferninho não comprimido:
 ```
-seq 0 999999999 | ./fiddle > rainbow_table.txt
+seq 0 999999999 | dune exec fiddle > rainbow_table.txt
 ```
 
 ## 📝 Licença
