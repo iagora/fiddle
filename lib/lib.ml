@@ -2,6 +2,54 @@ open Base
 open Stdio
 open Cryptokit
 
+let list_algorithms () =
+  let hash_algorithms = 
+      [
+          "Hash algorithms:";
+          "";
+          "\tsha3";
+          "\tkeccak";
+          "\tsha2";
+          "\tsha224";
+          "\tsha256";
+          "\tripemd160";
+          "\tsha384";
+          "\tsha512";
+          "\tblake2b";
+          "\tblake2b512";
+          "\tblake2s";
+          "\tblake2s256";
+          "\tblake3";
+          "\tblake3_256";
+          "\tripemd160";
+          "\tsha1";
+          "\tmd5";
+       ]
+  in
+  let mac_algorithms =
+      [
+          "MAC algorithms:";
+          "";
+          "\tsha1";
+          "\tsha256";
+          "\tsha384";
+          "\tsha512";
+          "\tripemd160";
+          "\tmd5";
+          "\tblake2b";
+          "\tblake2b512";
+          "\tblake2s";
+          "\tblake2s256";
+          "\tblake3";
+          "\tblake3_256";
+          "\tsiphash";
+          "\tsiphash128";
+      ]
+  in
+  List.iter ~f:(printf "%s\n") hash_algorithms;
+  printf "\n";
+  List.iter ~f:(printf "%s\n") mac_algorithms
+
 (* Function to calculate the CPF check digits *)
 let calculate_cpf_digits cpf_base =
   (* Helper to calculate a single digit based on the cpf array and the weights *)
@@ -26,7 +74,7 @@ let cpf_list_to_string cpf_digits (d1, d2) =
   |> fun base_str -> Printf.sprintf "%s-%d%d" base_str d1 d2
 
 (* Hash the CPF using Blake2b and print both hex and base64 encodings *)
-let hash_and_print_cpf cpf_str hash_algorithm digest_length  =
+let hash_and_print cpf_str hash_algorithm digest_length  =
   let hash_function =
       match hash_algorithm with
       | "sha3" -> Hash.sha3 digest_length
@@ -51,7 +99,37 @@ let hash_and_print_cpf cpf_str hash_algorithm digest_length  =
   let hex_encoded = transform_string (Hexa.encode ()) digest in
   printf "%s\t%s\n" cpf_str hex_encoded 
 
-let calculate_a_cpf number hash_algorithm digest_length =
+
+let mac_and_print data algorithm length =
+  let secret_key =
+    match Sys.getenv "FIDDLE_SECRET_KEY" with
+    | Some key -> transform_string (Base64.decode ()) key
+    | None -> failwith "Environment variable MAC_SECRET_KEY must be set."
+  in
+  let mac =
+    match algorithm with
+    | "sha1" -> MAC.hmac_sha1 secret_key
+    | "sha256" -> MAC.hmac_sha256 secret_key
+    | "sha384" -> MAC.hmac_sha384 secret_key
+    | "sha512" -> MAC.hmac_sha512 secret_key
+    | "ripemd160" -> MAC.hmac_ripemd160 secret_key
+    | "md5" -> MAC.hmac_md5 secret_key
+    | "blake2b" -> MAC.blake2b length secret_key
+    | "blake2b512" -> MAC.blake2b512 secret_key
+    | "blake2s" -> MAC.blake2s length secret_key
+    | "blake2s256" -> MAC.blake2s256 secret_key
+    | "blake3" -> MAC.blake3 length secret_key
+    | "blake3_256" -> MAC.blake3_256 secret_key
+    | "siphash" -> MAC.siphash secret_key
+    | "siphash128" -> MAC.siphash128 secret_key
+    | _ -> failwith "Unsupported MAC algorithm"
+  in
+  let result = mac#add_string data; mac#result in
+  let hex_encoded = transform_string (Hexa.encode ()) result in
+  printf "%s\t%s\n" data hex_encoded
+
+
+let hash_a_cpf hash_algorithm digest_length number =
   let int_to_cpf_array n =
     Printf.sprintf "%09d" n
     |> String.to_list
@@ -60,4 +138,15 @@ let calculate_a_cpf number hash_algorithm digest_length =
   let cpf_base = int_to_cpf_array number in
   let digits = calculate_cpf_digits cpf_base in
   let cpf_str = cpf_list_to_string cpf_base digits in
-    hash_and_print_cpf cpf_str hash_algorithm digest_length
+    hash_and_print cpf_str hash_algorithm digest_length
+
+let mac_a_cpf mac_algorithm digest_length number =
+  let int_to_cpf_array n =
+    Printf.sprintf "%09d" n
+    |> String.to_list
+    |> List.map ~f:(fun c -> Char.to_int c - Char.to_int '0')
+  in
+  let cpf_base = int_to_cpf_array number in
+  let digits = calculate_cpf_digits cpf_base in
+  let cpf_str = cpf_list_to_string cpf_base digits in
+    mac_and_print cpf_str mac_algorithm digest_length
