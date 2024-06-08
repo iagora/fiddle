@@ -1,5 +1,5 @@
 # [Choice] OCaml version: 3.14, 3.13, 3.12, 3.11
-ARG OCAML_VERSION=4.13
+ARG OCAML_VERSION=5.2
 FROM ocaml/opam:debian-ocaml-${OCAML_VERSION}
 
 USER root
