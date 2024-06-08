@@ -33,14 +33,14 @@ let process_cpf_command =
 
 let process_multiple_cpfs_command =
   Command.basic
-    ~summary:"Process multiple CPFs from command line arguments"
+    ~summary:"process multiple CPFs from command line arguments"
     (
       let%map_open.Command
         cpfs = anon (sequence ("cpf" %: string))
         and hash_algorithm = flag "-hash" (optional_with_default "sha256" string)
-                              ~doc:"Specify the hash algorithm. Use --list-algorithms for a full list"
+                              ~doc:"specify the hash algorithm. Use --list-algorithms for a full list"
         and mac_algorithm = flag "-mac" (optional string)
-                              ~doc: "Specify the MAC algorithm. Use --list-algorithms for a full list. Secret key must be in FIDDLE_SECRET_KEY env var"
+                              ~doc: "specify the MAC algorithm. Use --list-algorithms for a full list. Secret key must be in FIDDLE_SECRET_KEY env var"
         and digest_length = flag "-length" (optional_with_default 512 int)
                               ~doc:"specify the digest length in bits for algorithms that have varying length output"
       in
@@ -57,13 +57,13 @@ let process_multiple_cpfs_command =
 
 let process_stdin =
   Command.basic
-    ~summary:"Process CPFs straight from stdin"
+    ~summary:"process CPFs straight from stdin"
     (
       let%map_open.Command
         hash_algorithm = flag "-hash" (optional_with_default "sha256" string)
-                              ~doc:"Specify the hash algorithm. Use --list-algorithms for a full list."
+                              ~doc:"specify the hash algorithm. Use --list-algorithms for a full list."
         and mac_algorithm = flag "-mac" (optional string)
-                              ~doc: "Specify the MAC algorithm. Use --list-algorithms for a full list. Secret key must be in FIDDLE_SECRET_KEY env var"
+                              ~doc: "specify the MAC algorithm. Use --list-algorithms for a full list. Secret key must be in FIDDLE_SECRET_KEY env var"
         and digest_length = flag "-length" (optional_with_default 512 int)
                               ~doc:"specify the digest length in bits for algorithms that have varying length output"
       in
