@@ -79,6 +79,12 @@ você pode por exemplo gerar um inferninho não comprimido:
 $ seq 0 999999999 | fiddle stdin > rainbow_table.txt
 ```
 
+Também tem paralelismo taco bell:
+
+```
+$ seq 200 | xargs -L 25 -P 8 fiddle multiple
+```
+
 ## 📝 Licença
 
 Esse projeto está sob licença. Veja o arquivo [LICENÇA](LICENSE.md) para mais detalhes.
