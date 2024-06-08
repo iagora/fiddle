@@ -3,23 +3,23 @@ open Core
 
 let list_algorithms_command =
   Command.basic
-    ~summary:"List all supported hash algorithms"
+    ~summary:"list all supported hash algorithms"
     Command.Param.(
         return (fun () -> list_algorithms ())
     )
 
 let process_cpf_command =
   Command.basic
-    ~summary:"Calculate check digits and hash a single CPF number"
+    ~summary:"calculate check digits and hash a single CPF number"
     (
       let%map_open.Command
         cpf = anon ("cpf" %: string)
         and hash_algorithm = flag "-hash" (optional_with_default "sha256" string)
-                              ~doc:"Specify the hash algorithm. Use --list-algorithms for a full list."
+                              ~doc:"specify the hash algorithm. Use --list-algorithms for a full list"
         and mac_algorithm = flag "-mac" (optional string)
-                              ~doc: "Specify the MAC algorithm. Use --list-algorithms for a full list."
+                              ~doc: "specify the MAC algorithm. Use --list-algorithms for a full list. Secret key must be in FIDDLE_SECRET_KEY env var"
         and digest_length = flag "-length" (optional_with_default 512 int)
-                             ~doc:"Specify the digest length in bits."
+                              ~doc:"specify the digest length in bits for algorithms that have varying length output"
       in
       fun () ->
           match hash_algorithm, mac_algorithm with
@@ -38,11 +38,11 @@ let process_multiple_cpfs_command =
       let%map_open.Command
         cpfs = anon (sequence ("cpf" %: string))
         and hash_algorithm = flag "-hash" (optional_with_default "sha256" string)
-                              ~doc:"Specify the hash algorithm (sha256, blake2b)"
+                              ~doc:"Specify the hash algorithm. Use --list-algorithms for a full list"
         and mac_algorithm = flag "-mac" (optional string)
-                              ~doc: "Specify the MAC algorithm. Use --list-algorithms for a full list."
+                              ~doc: "Specify the MAC algorithm. Use --list-algorithms for a full list. Secret key must be in FIDDLE_SECRET_KEY env var"
         and digest_length = flag "-length" (optional_with_default 512 int)
-                             ~doc:"Specify the digest length in bits for Blake2b"
+                              ~doc:"specify the digest length in bits for algorithms that have varying length output"
       in
       fun () ->
           let f = match hash_algorithm, mac_algorithm with
@@ -61,11 +61,11 @@ let process_stdin =
     (
       let%map_open.Command
         hash_algorithm = flag "-hash" (optional_with_default "sha256" string)
-                              ~doc:"Specify the hash algorithm (sha256, blake2b)"
+                              ~doc:"Specify the hash algorithm. Use --list-algorithms for a full list."
         and mac_algorithm = flag "-mac" (optional string)
-                              ~doc: "Specify the MAC algorithm. Use --list-algorithms for a full list."
+                              ~doc: "Specify the MAC algorithm. Use --list-algorithms for a full list. Secret key must be in FIDDLE_SECRET_KEY env var"
         and digest_length = flag "-length" (optional_with_default 512 int)
-                             ~doc:"Specify the digest length in bits for Blake2b"
+                              ~doc:"specify the digest length in bits for algorithms that have varying length output"
       in
       fun () -> (
           let f = match hash_algorithm, mac_algorithm with
