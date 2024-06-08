@@ -10,42 +10,73 @@ O projeto ainda está em desenvolvimento:
 
 - [x] Gerar dígitos verificadores.
 - [x] Fazer o hash, e jogá-lo pra stdout.
-- [ ] Criar interface cli, ao invés de apenas receber stdin.
-- [ ] Opção de algoritmo de hash e comprimento.
+- [x] Criar interface cli, ao invés de apenas receber stdin.
+- [x] Opção de algoritmo de hash e comprimento.
+- [x] Opção de hash chaveado ou MAC, via variável de ambiente `FIDDLE_SECRET_KEY`
 - [ ] Busca reversa, a partir de um hash, encontre um CPF.
+- [ ] Verificar se a entrada já está com os dígitos verificadores.
+- [ ] Mask processor, com a capacidade de ditar qual formato o CPF se encontra `xxx.xxx.xxx-xx`, `xxxxxxxxx-xx` ou `xxxxxxxxxxx`
+- [ ] Suportar busca através de hash table pré-computadas????
 
 ## 💻 Pré-requisitos
 
 Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
-- `opam 4.13 / Cryptokit / Core`
+- `opam 5.2.0 / Cryptokit / Core / Core_unix`
 
 ## 🚀 Compilando Fiddle
 
 Para rodar o Fiddle, siga estas etapas:
 
 ```
-dune exec fiddle
+dune build 
 ```
 
+Eu ainda tenho que escrever a funcionalidade de instalação
 
-## ☕ Usando Fiddle
+## 🎻 Usando Fiddle
 
 Para usar Fiddle, siga estas etapas:
 
 Teste123:
 ```
-echo 123456789 | dune exec fiddle > rainbow_table.txt
+$ fiddle single 123456789
 ```
 O resultado deve ser:
 
 ```
-123456789-09    afa3f197d6d9bc55b26d0827aae1d64e651a2014f434d0de31ab33b906a1da4547b38ebc226c241b6852272f9bbf1a0c1d0eb3ea8438e37534f351de07a70d75
+123456789-09	65ffb63cf915bb8919d61837aa335bb39f4e07065e772b326bfb8de79d60745e
 ```
 
-Inferninho não comprimido:
+Você pode listar os algoritmos de hash e mac disponíveis via:
+
 ```
-seq 0 999999999 | dune exec fiddle > rainbow_table.txt
+$ fiddle list-algorithms
+```
+
+E selecionar o que deseja com
+
+```
+$ fiddle single 123456789 -hash sha512
+```
+
+Alguns algoritmos necessitam que se especifique o tamanho da saída:
+
+```
+$ fiddle single 123456789 -hash blake2b -length 64
+```
+
+Para utilizar hash chaveado ou mac:
+
+```
+$ export FIDDLE_SECRET_KEY="DmPBlJkhjvN0HxCKK9HrsiFLzIotZG9MT727xddLIzw="
+$ fiddle single 123456789 -mac sha256
+```
+
+O fiddle também aceita input direto do standard input, através do modo `stdin`,
+você pode por exemplo gerar um inferninho não comprimido:
+```
+$ seq 0 999999999 | fiddle stdin > rainbow_table.txt
 ```
 
 ## 📝 Licença
