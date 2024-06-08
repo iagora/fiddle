@@ -109,7 +109,7 @@ let mac_and_print data algorithm length =
   let secret_key =
     match Sys.getenv "FIDDLE_SECRET_KEY" with
     | Some key -> transform_string (Base64.decode ()) key
-    | None -> failwith "Environment variable MAC_SECRET_KEY must be set."
+    | None -> failwith "Environment variable FIDDLE_SECRET_KEY must be set."
   in
   let mac =
     match algorithm with
