@@ -12,7 +12,6 @@ let list_algorithms () =
           "\tsha2";
           "\tsha224";
           "\tsha256";
-          "\tripemd160";
           "\tsha384";
           "\tsha512";
           "\tblake2b";
@@ -30,20 +29,20 @@ let list_algorithms () =
       [
           "MAC algorithms:";
           "";
-          "\tsha1";
           "\tsha256";
           "\tsha384";
           "\tsha512";
-          "\tripemd160";
-          "\tmd5";
           "\tblake2b";
           "\tblake2b512";
           "\tblake2s";
           "\tblake2s256";
           "\tblake3";
           "\tblake3_256";
+          "\tripemd160";
           "\tsiphash";
           "\tsiphash128";
+          "\tsha1";
+          "\tmd5";
       ]
   in
   List.iter ~f:(printf "%s\n") hash_algorithms;

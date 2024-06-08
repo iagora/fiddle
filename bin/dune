@@ -1,5 +1,4 @@
 (executable
  (public_name fiddle)
- (name main)
  (libraries lib cryptokit core core_unix.command_unix)
  (preprocess (pps ppx_jane)))
