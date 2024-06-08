@@ -40,13 +40,20 @@ Para usar Fiddle, siga estas etapas:
 
 Teste123:
 ```
-$ fiddle single 123456789
+$ fiddle process 123456789
 ```
 O resultado deve ser:
 
 ```
 123456789-09	65ffb63cf915bb8919d61837aa335bb39f4e07065e772b326bfb8de79d60745e
 ```
+
+Fiddle pode processar mais de um CPF
+
+```
+$ fiddle process 123456789 987654321
+```
+
 
 Você pode listar os algoritmos de hash e mac disponíveis via:
 
@@ -57,20 +64,20 @@ $ fiddle list-algorithms
 E selecionar o que deseja com
 
 ```
-$ fiddle single 123456789 -hash sha512
+$ fiddle process 123456789 -hash sha512
 ```
 
 Alguns algoritmos necessitam que se especifique o tamanho da saída:
 
 ```
-$ fiddle single 123456789 -hash blake2b -length 64
+$ fiddle process 123456789 -hash blake2b -length 64
 ```
 
 Para utilizar hash chaveado ou mac:
 
 ```
 $ export FIDDLE_SECRET_KEY="DmPBlJkhjvN0HxCKK9HrsiFLzIotZG9MT727xddLIzw="
-$ fiddle single 123456789 -mac sha256
+$ fiddle process 123456789 -mac sha256
 ```
 
 O fiddle também aceita input direto do standard input, através do modo `stdin`,
