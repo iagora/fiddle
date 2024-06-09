@@ -8,31 +8,28 @@
 
 O projeto ainda está em desenvolvimento:
 
-- [x] Gerar dígitos verificadores.
-- [x] Fazer o hash, e jogá-lo pra stdout.
-- [x] Criar interface cli, ao invés de apenas receber stdin.
 - [x] Opção de algoritmo de hash e comprimento.
 - [x] Opção de hash chaveado ou MAC, via variável de ambiente `FIDDLE_SECRET_KEY`
 - [x] Busca reversa, a partir de um hash, encontre um CPF.
-- [ ] Verificar se a entrada já está com os dígitos verificadores.
-- [ ] Mask processor, com a capacidade de ditar qual formato o CPF se encontra `xxx.xxx.xxx-xx`, `xxxxxxxxx-xx` ou `xxxxxxxxxxx`
+- [ ] Verificar se a entrada já está com os dígitos verificadores, apenas confirmar se estão corretos.
+- [ ] Mask processor, com a capacidade de ditar qual formato o CPF usar `xxx.xxx.xxx-xx`, `xxxxxxxxx-xx`, `xxxxxxxxxxx` e afins
 - [ ] Suportar busca através de hash table pré-computadas????
 
 ## 💻 Pré-requisitos
 
 Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
-- `opam 5.2.0 / Cryptokit / Core / Core_unix`
+- `opam 5.2.0+flambda / Dune / Cryptokit / Core / Core_unix`
 
 ## 🚀 Compilando Fiddle
 
-Para rodar o Fiddle, siga estas etapas:
+Para compilar o Fiddle, siga estas etapas:
 
 ```
 dune build 
 ```
 
-Eu ainda tenho que escrever a funcionalidade de instalação
+Eu ainda tenho que escrever a funcionalidade de instalação, gerar um release e tal.
 
 ## 🎻 Usando Fiddle
 
