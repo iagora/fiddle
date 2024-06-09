@@ -8,11 +8,14 @@ authors: ["iagora"]
 license: "LICENSE"
 tags: ["topics" "to describe" "your" "project"]
 homepage: "https://github.com/iagora/fiddle"
-doc: "https://url/to/documentation"
+doc: "https://github.com/iagora/fiddle"
 bug-reports: "https://github.com/iagora/fiddle/issues"
 depends: [
   "ocaml"
   "dune" {>= "3.15"}
+  "cryptokit" {>= "1.19"}
+  "core" {>= "0.17.1"}
+  "core_unix" {>= "0.17.0"}
   "odoc" {with-doc}
 ]
 build: [

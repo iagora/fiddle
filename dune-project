@@ -13,13 +13,18 @@
 
 (license LICENSE)
 
-(documentation https://url/to/documentation)
+(documentation https://github.com/iagora/fiddle)
 
 (package
  (name fiddle)
  (synopsis "Product of boredom and OCaml curiosity")
  (description "This is a tool to play around with hashed CPFs (Cadastro Nacional de Pessoa Física), the Brazilian social security number")
- (depends ocaml dune)
+ (depends
+   ocaml
+   dune
+   (cryptokit (>= 1.19))
+   (core (>= 0.17.1))
+   (core_unix (>= 0.17.0)))
  (tags
   (topics "to describe" your project)))
 
