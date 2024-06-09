@@ -25,7 +25,7 @@ let fiddle =
             varying length output"
      and list_algs = flag "--list" no_arg ~doc:"list algorithms available"
      and value =
-       flag "--unhash" ~aliases:[ "-u" ] (optional string)
+       flag "--unhash" ~aliases:[ "--ughh"; "-u" ] (optional string)
          ~doc:
            "HEX from a hex digest string find a CPF, we call this unhash as \
             joke, we shorten the flag to u, so it can also mean ughh"
