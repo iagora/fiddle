@@ -30,7 +30,7 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
 Para compilar o Fiddle, siga estas etapas:
 
 ```
-dune build 
+$ dune build 
 ```
 
 Eu ainda tenho que escrever a funcionalidade de instalação, gerar um release e tal.
@@ -94,7 +94,7 @@ $ echo 123456789 | fiddle --mac sha256
 Tem também busca reversa, que pode ser acionada via a flag `-u` que é a inicial de `--ughh`, ou de `--unhash`, você que escolhe porque tem 🎉🗳️*DEMOCRACIA*🗳️🎉 também:
 
 ```
-fiddle -h md5 -u 823e99bf5f87df225fe8ce4c46340b73
+$ fiddle -h md5 -u 823e99bf5f87df225fe8ce4c46340b73
 ```
 
 Que vai resultar em: `000000003-53`.
