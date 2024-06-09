@@ -13,7 +13,7 @@ O projeto ainda está em desenvolvimento:
 - [x] Criar interface cli, ao invés de apenas receber stdin.
 - [x] Opção de algoritmo de hash e comprimento.
 - [x] Opção de hash chaveado ou MAC, via variável de ambiente `FIDDLE_SECRET_KEY`
-- [ ] Busca reversa, a partir de um hash, encontre um CPF.
+- [x] Busca reversa, a partir de um hash, encontre um CPF.
 - [ ] Verificar se a entrada já está com os dígitos verificadores.
 - [ ] Mask processor, com a capacidade de ditar qual formato o CPF se encontra `xxx.xxx.xxx-xx`, `xxxxxxxxx-xx` ou `xxxxxxxxxxx`
 - [ ] Suportar busca através de hash table pré-computadas????
@@ -40,7 +40,7 @@ Para usar Fiddle, siga estas etapas:
 
 Teste123:
 ```
-$ fiddle process 123456789
+$ echo 123456789 | fiddle
 ```
 O resultado deve ser:
 
@@ -51,46 +51,63 @@ O resultado deve ser:
 Fiddle pode processar mais de um CPF
 
 ```
-$ fiddle process 123456789 987654321
+$ echo "123456789\n987654321" | fiddle
+```
+ou
+
+```
+$ echo "123456789 987654321" | tr " " "\n" | fiddle
 ```
 
+O importante é cada valor ser separado por `newline`. O que quer dizer que você pode mandar um
+
+```
+$ seq 10000 | fiddle
+```
 
 Você pode listar os algoritmos de hash e mac disponíveis via:
 
 ```
-$ fiddle list-algorithms
+$ fiddle --list
 ```
 
 E selecionar o que deseja com
 
 ```
-$ fiddle process 123456789 -hash sha512
+$ echo 123456789 | fiddle -h sha512
 ```
 
 Alguns algoritmos necessitam que se especifique o tamanho da saída:
 
 ```
-$ fiddle process 123456789 -hash blake2b -length 64
+$ echo 123456789 | fiddle -hash blake2b -length 64
 ```
 
 Para utilizar hash chaveado ou mac:
 
 ```
 $ export FIDDLE_SECRET_KEY="DmPBlJkhjvN0HxCKK9HrsiFLzIotZG9MT727xddLIzw="
-$ fiddle process 123456789 -mac sha256
+$ echo 123456789 | fiddle -mac sha256
 ```
 
-O fiddle também aceita input direto do standard input, através do modo `stdin`,
-você pode por exemplo gerar um inferninho não comprimido:
+Você pode por exemplo gerar um inferninho não comprimido:
 ```
-$ seq 0 999999999 | fiddle stdin > rainbow_table.txt
+$ seq 999999999 | fiddle > rainbow_table.txt
 ```
 
-Também tem paralelismo taco bell:
+Também tem paralelismo taco bell, que não tá funcionando direito no momento:
 
 ```
-$ seq 200 | xargs -L 25 -P 8 fiddle multiple
+$ seq 200 | xargs -L 25 -P 8 fiddle
 ```
+
+E agora, tem também busca reversa:
+
+```
+fiddle -h md5 -r 823e99bf5f87df225fe8ce4c46340b73
+```
+
+Que vai resultar em: `000000003-53`
 
 ## 📝 Licença
 
