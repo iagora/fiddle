@@ -19,8 +19,12 @@ O projeto ainda está em desenvolvimento:
 
 Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
-- `opam 5.2.0+flambda / Dune / Cryptokit / Core / Core_unix`
-
+- `opam 5.2.0+flambda`
+- `dune`
+- `cryptokit`
+- `Core`
+- `Core_unix`
+  
 ## 🚀 Compilando Fiddle
 
 Para compilar o Fiddle, siga estas etapas:
