@@ -9,10 +9,10 @@
 O projeto ainda está em desenvolvimento:
 
 - [x] Opção de algoritmo de hash e comprimento.
-- [x] Opção de hash chaveado ou MAC, via variável de ambiente `FIDDLE_SECRET_KEY`
+- [x] Opção de hash chaveado ou MAC, via variável de ambiente `FIDDLE_SECRET_KEY`.
 - [x] Busca reversa, a partir de um hash, encontre um CPF.
 - [ ] Verificar se a entrada já está com os dígitos verificadores, apenas confirmar se estão corretos.
-- [ ] Mask processor, com a capacidade de ditar qual formato o CPF usar `xxx.xxx.xxx-xx`, `xxxxxxxxx-xx`, `xxxxxxxxxxx` e afins
+- [ ] Mask processor, com a capacidade de ditar qual formato o CPF usar `xxx.xxx.xxx-xx`, `xxxxxxxxx-xx`, `xxxxxxxxxxx` e afins.
 - [ ] Suportar busca através de hash table pré-computadas????
 
 ## 💻 Pré-requisitos
@@ -45,7 +45,7 @@ O resultado deve ser:
 123456789-09	65ffb63cf915bb8919d61837aa335bb39f4e07065e772b326bfb8de79d60745e
 ```
 
-Fiddle pode processar mais de um CPF
+Fiddle pode processar mais de um CPF.
 
 ```
 $ echo "123456789\n987654321" | fiddle
@@ -56,7 +56,7 @@ ou
 $ echo "123456789 987654321" | tr " " "\n" | fiddle
 ```
 
-O importante é cada valor ser separado por `newline`. O que quer dizer que você pode mandar um
+O importante é cada valor ser separado por `newline`. O que quer dizer que você pode mandar um:
 
 ```
 $ seq 10000 | fiddle
@@ -68,7 +68,7 @@ Você pode listar os algoritmos de hash e mac disponíveis via:
 $ fiddle --list
 ```
 
-E selecionar o que deseja com `-h` ou `--hash`
+E selecionar o que deseja com `-h` ou `--hash`.
 
 ```
 $ echo 123456789 | fiddle -h sha512
@@ -93,7 +93,7 @@ Tem também busca reversa, que pode ser acionada via a flag `-u` que é a inicia
 fiddle -h md5 -u 823e99bf5f87df225fe8ce4c46340b73
 ```
 
-Que vai resultar em: `000000003-53`
+Que vai resultar em: `000000003-53`.
 
 
 Também tem paralelismo taco bell, mas não tá funcionando direito no momento:
