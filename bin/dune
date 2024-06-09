@@ -1,5 +1,6 @@
 (executable
  (public_name fiddle)
  (libraries lib cryptokit core core_unix.command_unix)
+ (ocamlopt_flags -O3)
  (preprocess
   (pps ppx_jane)))
