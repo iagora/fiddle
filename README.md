@@ -71,7 +71,7 @@ Você pode listar os algoritmos de hash e mac disponíveis via:
 $ fiddle --list
 ```
 
-E selecionar o que deseja com
+E selecionar o que deseja com `-h` ou `--hash`
 
 ```
 $ echo 123456789 | fiddle -h sha512
@@ -80,34 +80,31 @@ $ echo 123456789 | fiddle -h sha512
 Alguns algoritmos necessitam que se especifique o tamanho da saída:
 
 ```
-$ echo 123456789 | fiddle -hash blake2b -length 64
+$ echo 123456789 | fiddle --hash blake2b --length 64
 ```
 
-Para utilizar hash chaveado ou mac:
+Para utilizar hash chaveado ou mac é necessário que variável de ambiente `FIDDLE_SECRET_KEY` contenha com uma chave secreta em base64. Um algoritmo tem de ser selecionado com a flag `-m` ou `--mac`:
 
 ```
 $ export FIDDLE_SECRET_KEY="DmPBlJkhjvN0HxCKK9HrsiFLzIotZG9MT727xddLIzw="
-$ echo 123456789 | fiddle -mac sha256
+$ echo 123456789 | fiddle --mac sha256
 ```
 
-Você pode por exemplo gerar um inferninho não comprimido:
+Tem também busca reversa, que pode ser acionada via a flag `-u` que é a inicial de ughh, ou de unhash:
+
 ```
-$ seq 999999999 | fiddle > rainbow_table.txt
+fiddle -h md5 -u 823e99bf5f87df225fe8ce4c46340b73
 ```
 
-Também tem paralelismo taco bell, que não tá funcionando direito no momento:
+Que vai resultar em: `000000003-53`
+
+
+Também tem paralelismo taco bell, mas não tá funcionando direito no momento:
 
 ```
 $ seq 200 | xargs -L 25 -P 8 fiddle
 ```
 
-E agora, tem também busca reversa:
-
-```
-fiddle -h md5 -r 823e99bf5f87df225fe8ce4c46340b73
-```
-
-Que vai resultar em: `000000003-53`
 
 ## 📝 Licença
 
