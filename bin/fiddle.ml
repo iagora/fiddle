@@ -1,5 +1,6 @@
 open Lib
 open Core
+open Cryptokit
 
 let fiddle =
   Command.basic
@@ -31,23 +32,25 @@ let fiddle =
             joke, we shorten the flag to u, so it can also mean ughh"
      in
      fun () ->
+       let secret_key =
+         match Sys.getenv "FIDDLE_SECRET_KEY" with
+         | Some key -> transform_string (Base64.decode ()) key
+         | None ->
+             failwith "Environment variable FIDDLE_SECRET_KEY must be set."
+       in
        let f =
          match (hash_algorithm, mac_algorithm) with
          | hash_alg, None -> hash hash_alg digest_length
-         | _, Some mac_alg -> mac mac_alg digest_length
+         | _, Some mac_alg -> mac secret_key mac_alg digest_length
        in
        if list_algs then list_algorithms ()
        else if Option.is_some value then
-         let digest = Option.value value ~default:"" in
-         digest_to_cpf f digest
+         Option.value value ~default:"" |> digest_to_cpf f
        else if List.is_empty inputs then
          In_channel.fold_lines In_channel.stdin ~init:() ~f:(fun () line ->
-             let number = Int.of_string line in
-             cpf_to_digest f number)
+             Int.of_string line |> cpf_to_digest f)
        else
-         List.iter inputs ~f:(fun cpf ->
-             let number = Int.of_string cpf in
-             cpf_to_digest f number))
+         List.iter inputs ~f:(fun cpf -> Int.of_string cpf |> cpf_to_digest f))
 
 (* Entry point of the program *)
 let () = Command_unix.run fiddle

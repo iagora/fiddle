@@ -81,9 +81,9 @@ let cpf_list_to_string cpf_digits (d1, d2) =
   |> fun base_str -> Printf.sprintf "%s-%d%d" base_str d1 d2
 
 (* Hash the CPF using Blake2b and print both hex and base64 encodings *)
-let hash hash_algorithm digest_length data =
+let hash algorithm digest_length data =
   let hash_function =
-    match hash_algorithm with
+    match algorithm with
     | "sha3" -> Hash.sha3 digest_length
     | "keccak" -> Hash.keccak digest_length
     | "sha2" -> Hash.sha2 digest_length
@@ -108,12 +108,7 @@ let hash hash_algorithm digest_length data =
   in
   transform_string (Hexa.encode ()) digest
 
-let mac algorithm length data =
-  let secret_key =
-    match Sys.getenv "FIDDLE_SECRET_KEY" with
-    | Some key -> transform_string (Base64.decode ()) key
-    | None -> failwith "Environment variable FIDDLE_SECRET_KEY must be set."
-  in
+let mac secret_key algorithm length data =
   let mac =
     match algorithm with
     | "sha1" -> MAC.hmac_sha1 secret_key
