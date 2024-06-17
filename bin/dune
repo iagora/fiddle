@@ -2,5 +2,11 @@
  (public_name fiddle)
  (libraries lib cryptokit core core_unix.command_unix)
  (ocamlopt_flags -O3)
+ (modules fiddle)
  (preprocess
   (pps ppx_jane)))
+
+(executable
+  (public_name mascaml)
+  (ocamlopt_flags -O3)
+  (modules mascaml))
