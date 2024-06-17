@@ -108,7 +108,12 @@ let hash algorithm digest_length data =
   in
   transform_string (Hexa.encode ()) digest
 
-let mac secret_key algorithm length data =
+let mac algorithm length data =
+  let secret_key =
+    match Sys.getenv "FIDDLE_SECRET_KEY" with
+    | Some key -> transform_string (Base64.decode ()) key
+    | None -> failwith "Environment variable FIDDLE_SECRET_KEY must be set."
+  in
   let mac =
     match algorithm with
     | "sha1" -> MAC.hmac_sha1 secret_key

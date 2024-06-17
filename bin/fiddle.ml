@@ -1,6 +1,5 @@
 open Lib
 open Core
-open Cryptokit
 
 let fiddle =
   Command.basic
@@ -32,16 +31,10 @@ let fiddle =
             joke, we shorten the flag to u, so it can also mean ughh"
      in
      fun () ->
-       let secret_key =
-         match Sys.getenv "FIDDLE_SECRET_KEY" with
-         | Some key -> transform_string (Base64.decode ()) key
-         | None ->
-             failwith "Environment variable FIDDLE_SECRET_KEY must be set."
-       in
        let f =
          match (hash_algorithm, mac_algorithm) with
          | hash_alg, None -> hash hash_alg digest_length
-         | _, Some mac_alg -> mac secret_key mac_alg digest_length
+         | _, Some mac_alg -> mac mac_alg digest_length
        in
        if list_algs then list_algorithms ()
        else if Option.is_some value then
