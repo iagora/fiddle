@@ -23,6 +23,11 @@ let fiddle =
          ~doc:
            "LENGTH specify the digest length in bits for algorithms that have \
             varying length output"
+     and mask =
+       flag "--mask" ~aliases:[ "-k" ] (optional string)
+         ~doc:
+           "MASK specify a mask as to guide the check insertion, and allow \
+            permutations"
      and list_algs = flag "--list" no_arg ~doc:"list algorithms available"
      and value =
        flag "--unhash" ~aliases:[ "--ughh"; "-u" ] (optional string)
@@ -31,19 +36,30 @@ let fiddle =
             joke, we shorten the flag to u, so it can also mean ughh"
      in
      fun () ->
-       let f =
+       let fn =
          match (hash_algorithm, mac_algorithm) with
          | hash_alg, None -> hash hash_alg digest_length
          | _, Some mac_alg -> mac mac_alg digest_length
        in
        if list_algs then list_algorithms ()
-       else if Option.is_some value then
-         Option.value value ~default:"" |> digest_to_cpf f
-       else if List.is_empty inputs then
-         In_channel.fold_lines In_channel.stdin ~init:() ~f:(fun () line ->
-             Int.of_string line |> cpf_to_digest f)
        else
-         List.iter inputs ~f:(fun cpf -> Int.of_string cpf |> cpf_to_digest f))
+         match (mask, value) with
+         | Some mask, Some value -> digest_to_cpf_with_mask fn mask value
+         | None, Some value -> digest_to_cpf fn value
+         | Some mask, None ->
+             if List.is_empty inputs then
+               In_channel.fold_lines In_channel.stdin ~init:()
+                 ~f:(fun () line -> cpf_to_digest_with_mask fn mask line)
+             else
+               List.iter inputs ~f:(fun cpf ->
+                   cpf_to_digest_with_mask fn mask cpf)
+         | None, None ->
+             if List.is_empty inputs then
+               In_channel.fold_lines In_channel.stdin ~init:()
+                 ~f:(fun () line -> Int.of_string line |> cpf_to_digest fn)
+             else
+               List.iter inputs ~f:(fun cpf ->
+                   Int.of_string cpf |> cpf_to_digest fn))
 
-(* Entry point of the program *)
+(*Entry point of the program *)
 let () = Command_unix.run fiddle

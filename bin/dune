@@ -7,6 +7,6 @@
   (pps ppx_jane)))
 
 (executable
-  (public_name mascaml)
-  (ocamlopt_flags -O3)
-  (modules mascaml))
+ (public_name mascaml)
+ (ocamlopt_flags -O3)
+ (modules mascaml))

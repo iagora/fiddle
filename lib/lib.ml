@@ -1,4 +1,4 @@
-open Base
+open Core
 open Stdio
 open Cryptokit
 
@@ -80,7 +80,7 @@ let cpf_list_to_string cpf_digits (d1, d2) =
   List.fold cpf_digits ~init:"" ~f:(fun acc x -> acc ^ Int.to_string x)
   |> fun base_str -> Printf.sprintf "%s-%d%d" base_str d1 d2
 
-(* Hash the CPF using Blake2b and print both hex and base64 encodings *)
+(* Hash hex encodings *)
 let hash algorithm digest_length data =
   let hash_function =
     match algorithm with
@@ -162,3 +162,169 @@ let cpf_to_digest f number =
   let cpf_str = cpf_list_to_string cpf_base digits in
   let digest = f cpf_str in
   printf "%s\t%s\n" cpf_str digest
+
+let cpf_to_digest_with_mask f mask input =
+  let flag = ref false in
+  let rec process_mask idx_in idx_mask check_digits acc =
+    if idx_mask >= String.length mask then
+      List.rev acc (* End of mask, return accumulated result *)
+    else if idx_in >= String.length input then
+      invalid_arg "Input is shorter than the mask."
+    else
+      let a, b = check_digits in
+      let x = char_of_int (a + int_of_char '0') in
+      let y = char_of_int (b + int_of_char '0') in
+      let mask_char = mask.[idx_mask] in
+      match mask_char with
+      | '?' ->
+          (* Escape sequence handling *)
+          if idx_mask + 1 < String.length mask then
+            let open Char in
+            let next_char = mask.[idx_mask + 1] in
+            match next_char with
+            | '?' as c ->
+                if input.[idx_in] <> c then
+                  invalid_arg "Inputs don't correspond with mask"
+                else
+                  process_mask (idx_in + 1) (idx_mask + 2) check_digits
+                    ('?' :: acc) (* Literal '?' *)
+            | ('x' | 'y') as c ->
+                if input.[idx_in] <> c then
+                  invalid_arg "Inputs don't correspond with mask"
+                else
+                  process_mask (idx_in + 1) (idx_mask + 2) check_digits
+                    (next_char :: acc) (* Literal 'x' or 'y' *)
+            | c when Char.is_digit c ->
+                if input.[idx_in] <> c then
+                  invalid_arg "Inputs don't correspond with mask"
+                else
+                  process_mask (idx_in + 1) (idx_mask + 2) check_digits
+                    (input.[idx_in] :: acc) (* Literal numeric digits *)
+            | _ -> invalid_arg "Invalid mask format after '?'"
+          else invalid_arg "Mask ends with unescaped '?'"
+      | 'x' ->
+          let open Char in
+          if input.[idx_in] <> x && input.[idx_in] <> 'x' then flag := true;
+          if input.[idx_in] = 'x' then 
+          process_mask (idx_in + 1) (idx_mask + 1) check_digits
+            (x :: acc)
+          else
+          process_mask (idx_in + 1) (idx_mask + 1) check_digits
+            (input.[idx_in] :: acc)
+      | 'y' ->
+          let open Char in
+          if input.[idx_in] <> y && input.[idx_in] <> 'y' then flag := true;
+          if input.[idx_in] = 'y' then 
+          process_mask (idx_in + 1) (idx_mask + 1) check_digits
+            (y :: acc)
+          else
+          process_mask (idx_in + 1) (idx_mask + 1) check_digits
+            (input.[idx_in] :: acc)
+      | '1' .. '9' ->
+          (* Direct mapping from input based on mask *)
+          process_mask (idx_in + 1) (idx_mask + 1) check_digits
+            (input.[idx_in] :: acc)
+      | _ as c ->
+          let open Char in
+          if input.[idx_in] <> c then
+            invalid_arg "Inputs don't correspond with mask"
+          else
+            process_mask (idx_in + 1) (idx_mask + 1) check_digits
+              (input.[idx_in] :: acc)
+    (* Ignore other characters in mask *)
+  in
+  let extracted =
+    String.to_list mask
+    |> List.mapi ~f:(fun idx char -> (char, input.[idx]))
+    |> List.filter ~f:(fun (char, _) ->
+           Char.is_digit char || Char.equal char 'x' || Char.equal char 'y')
+    |> List.sort ~compare:(fun (a, _) (b, _) -> Char.compare a b)
+    |> List.filter_map ~f:(fun (char, digit) ->
+           if Char.is_digit char then Some digit else None)
+    |> String.of_char_list
+  in
+  let cpf_base =
+    String.to_list extracted
+    |> List.map ~f:(fun c -> Char.to_int c - Char.to_int '0')
+  in
+  let check_digits = calculate_cpf_digits cpf_base in
+  let cpf_digits = process_mask 0 0 check_digits [] in
+  let cpf = String.of_char_list cpf_digits in
+  let digest = f cpf in
+  let ast = if !flag then "*\t" else "\t" in
+  printf "%s%s%s\n" cpf ast digest
+
+let digest_to_cpf_with_mask f mask target_result =
+  let mappings =
+    String.to_list mask
+    |> List.filter ~f:(fun char ->
+           Char.is_digit char)
+    |> List.mapi ~f:(fun idx char -> (char, idx))
+    |> List.sort ~compare:(fun (a, _) (b, _) -> Char.compare a b)
+    |> List.map ~f:(fun (_, idx) -> idx)
+  in
+  let rec search n =
+    if n > 999999999 then None (* Limiting the range for simplicity *)
+    else
+      let input = Printf.sprintf "%09d" n in
+      let rec process_mask idx_in idx_mask check_digits acc =
+        if idx_mask >= String.length mask then
+            List.rev acc (* End of mask, return accumulated result *)
+        else if idx_in > String.length input then
+            invalid_arg "Input is shorter than the mask."
+        else
+          let a, b = check_digits in
+          let x = char_of_int (a + int_of_char '0') in
+          let y = char_of_int (b + int_of_char '0') in
+          let mask_char = mask.[idx_mask] in
+          match mask_char with
+          | '?' ->
+              (* Escape sequence handling *)
+              if idx_mask + 1 < List.length mappings then
+                let next_char = mask.[idx_mask + 1] in
+                match next_char with
+                | '?' | 'x' | 'y' ->
+                    process_mask idx_in (idx_mask + 2) check_digits
+                      (next_char :: acc)
+                    (* Literal '?' *)
+                | c when Char.is_digit c ->
+                    process_mask idx_in (idx_mask + 2) check_digits
+                      (next_char :: acc)
+                    (* Literal numeric digits *)
+                | _ -> invalid_arg "Invalid mask format after '?'"
+              else invalid_arg "Mask ends with unescaped '?'"
+          | 'x' -> process_mask idx_in (idx_mask + 1) check_digits (x :: acc)
+          | 'y' -> process_mask idx_in (idx_mask + 1) check_digits (y :: acc)
+          | '1' .. '9' ->
+              (* Direct mapping from input based on mask *)
+             let idx = Option.value_exn (List.nth mappings idx_in) in
+              process_mask (idx_in + 1) (idx_mask + 1) check_digits
+                (input.[idx] :: acc)
+          | _ as c -> process_mask idx_in (idx_mask + 1) check_digits (c :: acc)
+        (* Ignore other characters in mask *)
+      in
+      (* Extracting characters and mapping them to their positions *)
+      let cpf_base = int_to_cpf_array n in
+      let check_digits = calculate_cpf_digits cpf_base in
+      let cpf_digits = process_mask 0 0 check_digits [] in
+      let cpf_str = String.of_char_list cpf_digits in
+      let digest = f cpf_str in
+      if String.equal digest target_result then Some (cpf_str, check_digits) else search (n + 1)
+  in
+  let (cpf, check) =
+    match search 0 with
+    | Some data -> data
+    | None -> failwith "Couldn't find CPF with matching digest"
+  in
+      let extracted =
+          String.to_list mask
+    |> List.mapi ~f:(fun idx char -> (char, cpf.[idx]))
+    |> List.filter ~f:(fun (char, _) ->
+            Char.is_digit char || Char.equal char 'x' || Char.equal char 'y')
+    |> List.sort ~compare:(fun (a, _) (b, _) -> Char.compare a b)
+    |> List.filter_map ~f:(fun (char, digit) ->
+            if Char.is_digit char then Some digit else None)
+    |> String.of_char_list
+  in
+  let (x, y) = check in
+  printf "%s-%d%d\n" extracted x y
