@@ -44,22 +44,38 @@ let fiddle =
        if list_algs then list_algorithms ()
        else
          match (mask, value) with
-         | Some mask, Some value -> digest_to_cpf_with_mask fn mask value
-         | None, Some value -> digest_to_cpf fn value
+         | Some mask, Some value -> (
+             try digest_to_cpf_with_mask fn mask value with
+             | Invalid_argument msg ->
+                 Printf.eprintf "Invalid Arguments: %s\n" msg
+             | Failure msg -> Printf.eprintf "Error: %s\n" msg)
+         | None, Some value -> (
+             try digest_to_cpf fn value
+             with Failure msg -> Printf.eprintf "Error: %s\n" msg)
          | Some mask, None ->
              if List.is_empty inputs then
                In_channel.fold_lines In_channel.stdin ~init:()
-                 ~f:(fun () line -> cpf_to_digest_with_mask fn mask line)
+                 ~f:(fun () line ->
+                   try cpf_to_digest_with_mask fn mask line with
+                   | Invalid_argument msg ->
+                       Printf.eprintf "Invalid Arguments: %s\n" msg
+                   | Failure msg -> Printf.eprintf "Error: %s\n" msg)
              else
                List.iter inputs ~f:(fun cpf ->
-                   cpf_to_digest_with_mask fn mask cpf)
+                   try cpf_to_digest_with_mask fn mask cpf with
+                   | Invalid_argument msg ->
+                       Printf.eprintf "Invalid Arguments: %s\n" msg
+                   | Failure msg -> Printf.eprintf "Error: %s\n" msg)
          | None, None ->
              if List.is_empty inputs then
                In_channel.fold_lines In_channel.stdin ~init:()
-                 ~f:(fun () line -> Int.of_string line |> cpf_to_digest fn)
+                 ~f:(fun () line ->
+                   try Int.of_string line |> cpf_to_digest fn
+                   with Failure msg -> Printf.eprintf "Error: %s\n" msg)
              else
                List.iter inputs ~f:(fun cpf ->
-                   Int.of_string cpf |> cpf_to_digest fn))
+                   try Int.of_string cpf |> cpf_to_digest fn
+                   with Failure msg -> Printf.eprintf "Error: %s\n" msg))
 
 (*Entry point of the program *)
 let () = Command_unix.run fiddle
