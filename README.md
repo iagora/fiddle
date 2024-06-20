@@ -25,17 +25,19 @@ Before starting, make sure you have met the following requirements:
 - `Core`
 - `Core_unix`
 
-## 🚀 Compiling Fiddle
+## 🚀 Compiling fiddle
 
-To compile Fiddle, follow these steps:
+To compile fiddle, follow these steps:
 
 $ dune build
 
 I still need to write the installation functionality, generate a release, and so on.
 
-## 🎻 Using Fiddle
+## 🎻 Using fiddle
 
-To use Fiddle, follow these steps:
+# Basics
+
+To use fiddle, follow these steps:
 
 Test123:
 
@@ -48,7 +50,7 @@ The result should be:
 123456789-09  65ffb63cf915bb8919d61837aa335bb39f4e07065e772b326bfb8de79d60745e
 ```
 
-Fiddle can process more than one CPF.
+fiddle can process more than one CPF.
 
 ``` bash
 $ echo "123456789\n987654321" | fiddle
@@ -91,7 +93,7 @@ $ export FIDDLE_SECRET_KEY="DmPBlJkhjvN0HxCKK9HrsiFLzIotZG9MT727xddLIzw="
 $ echo 123456789 | fiddle --mac sha256
 ```
 
-There's also a reverse search, which can be triggered via the `-u` flag, short for `--ughh`, or `--unhash`, your choice because 🎉🗳️*DEMOCRACY*🗳️🎉:
+As a ~~joke~~ treat, there's also a reverse search, which can be triggered via the `-u` flag, short for `--ughh`, or `--unhash`, your choice because 🎉🗳️*DEMOCRACY*🗳️🎉:
 
 ``` bash
 $ fiddle -h md5 -u 823e99bf5f87df225fe8ce4c46340b73
@@ -105,7 +107,9 @@ There is also Taco Bell parallelism, but it's not working properly at the moment
 $ seq 200 | xargs -L 25 -P 8 fiddle
 ```
 
-`fiddle` also comes with `mascaml`, and support masks. `mascaml` is a maskprocessor, that works similar to hashcat's.
+# Masks
+
+`fiddle` also comes with `mascaml`, and supports masks. `mascaml` is a maskprocessor, that works similar to `hashcat`'s.
 Say for example, that whoever decide to make a database indexing by CPF hashes, decided to avoid pre-computed hashtables
 by adding other things to the string, or say permute the order of the digits. `mascaml` can generate all the combinations of
 CPFs with a mask like
@@ -124,7 +128,7 @@ $ fiddle --mask ")(987un654hash321-xy"
 It recognizes `x` and `y` as the placement for the check digits, respectively. And takes the numbered digits as the ordering.
 So, say that `mascaml` generates the input value `)(001un671hash540-xy`, fiddle knows that there is a permutation where this actually
 corresponds to the CPF `045176100` and that `x` and `y` are supposed to be the check digits, which it calculates and places appropriately
-before calculating the hash. So it'd take the hash of `)(001un671hash540-63` as `63` are the check digits for `045176100`.
+before calculating the hash. So it'd take the hash of `)(001un671hash540-63`, as `63` are the check digits for `045176100`.
 So you could generate a table for all these mangled CPFs with a command like:
 
 ``` bash
@@ -148,7 +152,7 @@ Which would generate the following output:
 .               .                       .
 ```
 
-In case the input instead of having `x` and `y`, has the check digits, fiddle will consider the values provided over the calculated ones, but will output a `*` to indicate the error.
+In case the input instead of having `x` and `y`, has the check digits, fiddle will consider the values provided over the calculated ones, but will output a `*` to indicate an error in case the check digits presented do not match the calculated ones.
 
 Say, `fiddle --mask ")(987un654hash321-xy"` takes instead of `)(001un671hash540-xy` or `)(001un671hash540-63` (which has the correct check digits), it receives `)(001un671hash540-91`,
 instead of outputting:
