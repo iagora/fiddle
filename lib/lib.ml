@@ -280,7 +280,7 @@ let cpf_to_digest_with_mask f mask input =
   let digest = f cpf in
   let ast = if !flag then "*" else "" in
   let x, y = check_digits in
-  printf "%s-%d%d\t%s%s\t%s\n" extracted x y cpf ast digest
+  printf "%s-%d%d%s\t%s\t%s\n" extracted x y ast cpf digest
 
 let digest_to_cpf_with_mask f mask target_result =
   let mappings =

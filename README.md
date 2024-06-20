@@ -1,112 +1,169 @@
-# Fiddle
+# 🎻 fiddle
 
 <img src="image.png" alt="Fiddle logo">
 
-> Fiddle é produto do meu tédio e um trabalho em progresso. Eu não vou manter o README atualizado no momento, porque eu to correndo atrás das features, e como está muito na infância, o branch main é onde se desenvolve também. Fiddle no momento é só um programa besta em OCaml pra pegar números que sejam possíveis CPFs, calcular os dígitos verificadores corretos, e calcular o hash do CPF. Como se fosse uma Rainbow Table de CPFs. Não é exatamente útil. 
+> fiddle is a product of my boredom and a work in progress. I won't keep the README updated at the moment because I'm focusing on features, and since it's still in its infancy, the main branch is where development happens too. Currently, Fiddle is just a simple OCaml program to generate possible CPF numbers, calculate the correct check digits, and compute the hash of the CPF. It's like a Rainbow Table of CPFs. Not exactly useful.
 
-### Ajustes e melhorias
+## Adjustments and improvements
 
-O projeto ainda está em desenvolvimento:
+The project is still in development:
 
-- [x] Opção de algoritmo de hash e comprimento.
-- [x] Opção de hash chaveado ou MAC, via variável de ambiente `FIDDLE_SECRET_KEY`.
-- [x] Busca reversa, a partir de um hash, encontre um CPF.
-- [ ] Verificar se a entrada já está com os dígitos verificadores, apenas confirmar se estão corretos.
-- [ ] Mask processor, com a capacidade de ditar qual formato o CPF usar `xxx.xxx.xxx-xx`, `xxxxxxxxx-xx`, `xxxxxxxxxxx` e afins.
-- [ ] Suportar busca através de hash table pré-computadas????
+- [x] Option for hash algorithm and length.
+- [x] Option for keyed hash or MAC, via the `FIDDLE_SECRET_KEY` environment variable.
+- [x] Reverse search, find a CPF from a hash.
+- [x] Verify if the input already has check digits, just confirm if they are correct.
+- [x] Mask processor, with the ability to dictate which format the CPF should use `xxx.xxx.xxx-xx`, `xxxxxxxxx-xx`, `xxxxxxxxxxx` and so on.
+- [ ] Support search through pre-computed hash tables
 
-## 💻 Pré-requisitos
+## 💻 Prerequisites
 
-Antes de começar, verifique se você atendeu aos seguintes requisitos:
+Before starting, make sure you have met the following requirements:
 
 - `opam 5.2.0+flambda`
 - `dune`
 - `cryptokit`
 - `Core`
 - `Core_unix`
-  
-## 🚀 Compilando Fiddle
 
-Para compilar o Fiddle, siga estas etapas:
+## 🚀 Compiling Fiddle
 
-```
-$ dune build 
-```
+To compile Fiddle, follow these steps:
 
-Eu ainda tenho que escrever a funcionalidade de instalação, gerar um release e tal.
+$ dune build
 
-## 🎻 Usando Fiddle
+I still need to write the installation functionality, generate a release, and so on.
 
-Para usar Fiddle, siga estas etapas:
+## 🎻 Using Fiddle
 
-Teste123:
-```
+To use Fiddle, follow these steps:
+
+Test123:
+
+``` bash
 $ echo 123456789 | fiddle
 ```
-O resultado deve ser:
+The result should be:
 
-```
-123456789-09	65ffb63cf915bb8919d61837aa335bb39f4e07065e772b326bfb8de79d60745e
+``` bash
+123456789-09  65ffb63cf915bb8919d61837aa335bb39f4e07065e772b326bfb8de79d60745e
 ```
 
-Fiddle pode processar mais de um CPF.
+Fiddle can process more than one CPF.
 
-```
+``` bash
 $ echo "123456789\n987654321" | fiddle
 ```
-ou
 
-```
+or
+
+``` bash
 $ echo "123456789 987654321" | tr " " "\n" | fiddle
 ```
 
-O importante é cada valor ser separado por `newline`. O que quer dizer que você pode mandar um:
+The important thing is each value should be separated by a `newline`. Which means you can run:
 
-```
+``` bash
 $ seq 10000 | fiddle
 ```
 
-Você pode listar os algoritmos de hash e mac disponíveis via:
+You can list the available hash and mac algorithms via:
 
-```
+``` bash
 $ fiddle --list
 ```
 
-E selecionar o que deseja com `-h` ou `--hash`.
+And select the desired one with `-h` or `--hash`.
 
-```
+``` bash
 $ echo 123456789 | fiddle -h sha512
 ```
 
-Alguns algoritmos necessitam que se especifique o tamanho da saída:
+Some algorithms require specifying the output length:
 
-```
+``` bash
 $ echo 123456789 | fiddle --hash blake2b --length 64
 ```
 
-Para utilizar hash chaveado ou mac é necessário que variável de ambiente `FIDDLE_SECRET_KEY` contenha com uma chave secreta em base64. Um algoritmo tem de ser selecionado com a flag `-m` ou `--mac`:
+To use a keyed hash or mac, the `FIDDLE_SECRET_KEY` environment variable must contain a base64 secret key. An algorithm must be selected with the `-m` or `--mac` flag:
 
-```
+``` bash
 $ export FIDDLE_SECRET_KEY="DmPBlJkhjvN0HxCKK9HrsiFLzIotZG9MT727xddLIzw="
 $ echo 123456789 | fiddle --mac sha256
 ```
 
-Tem também busca reversa, que pode ser acionada via a flag `-u` que é a inicial de `--ughh`, ou de `--unhash`, você que escolhe porque tem 🎉🗳️*DEMOCRACIA*🗳️🎉 também:
+There's also a reverse search, which can be triggered via the `-u` flag, short for `--ughh`, or `--unhash`, your choice because 🎉🗳️*DEMOCRACY*🗳️🎉:
 
-```
+``` bash
 $ fiddle -h md5 -u 823e99bf5f87df225fe8ce4c46340b73
 ```
 
-Que vai resultar em: `000000003-53`.
+Which will result in: `000000003-53`.
 
+There is also Taco Bell parallelism, but it's not working properly at the moment:
 
-Também tem paralelismo taco bell, mas não tá funcionando direito no momento:
-
-```
+``` bash
 $ seq 200 | xargs -L 25 -P 8 fiddle
 ```
 
+`fiddle` also comes with `mascaml`, and support masks. `mascaml` is a maskprocessor, that works similar to hashcat's.
+Say for example, that whoever decide to make a database indexing by CPF hashes, decided to avoid pre-computed hashtables
+by adding other things to the string, or say permute the order of the digits. `mascaml` can generate all the combinations of
+CPFs with a mask like
 
-## 📝 Licença
+``` bash
+$ mascaml ")(?d?d?dun?d?d?dhash?d?d?d-xy"
+```
 
-Esse projeto está sob licença. Veja o arquivo [LICENÇA](LICENSE.md) para mais detalhes.
+This would generate all values from `)(000un000hash000-xy` until  `)(999un999hash999-xy`.
+`fiddle` can take these inputs, through its own mask support:
+
+``` bash
+$ fiddle --mask ")(987un654hash321-xy"
+```
+
+It recognizes `x` and `y` as the placement for the check digits, respectively. And takes the numbered digits as the ordering.
+So, say that `mascaml` generates the input value `)(001un671hash540-xy`, fiddle knows that there is a permutation where this actually
+corresponds to the CPF `045176100` and that `x` and `y` are supposed to be the check digits, which it calculates and places appropriately
+before calculating the hash. So it'd take the hash of `)(001un671hash540-63` as `63` are the check digits for `045176100`.
+So you could generate a table for all these mangled CPFs with a command like:
+
+``` bash
+$ mascaml ")(?d?d?dun?d?d?dhash?d?d?d-xy" | fiddle --mask ")(987un654hash321-xy"
+```
+Which would generate the following output:
+
+```bash
+000000000-00	)(000un000hash000-00	ed6f912a42fa32b108dcaf8aca0e9b1c349e3494f162c3937c179e495fdbc98b
+100000000-19	)(000un000hash001-19	69937cc5287b4dc33259cec10a525dfb88d959022495badea1739d35dc099ba5
+200000000-27	)(000un000hash002-27	1de87d04d043f7919b7d4f4101282269406632a0400978e7c876991c82a89091
+300000000-35	)(000un000hash003-35	2b2e5fc782383e1e122df23a44189804d9fbc5ac7cb1d6a80121504414f89194
+400000000-43	)(000un000hash004-43	9ec6093c1d6b6dc00edbb4096035c6a0f7d052b7e3cafbb9c47697946ccc898e
+500000000-51	)(000un000hash005-51	b41d1e0b082d1ee9298c2e9030611904cbf5bf33284ea32c14f9ca5791d6c47c
+600000000-60	)(000un000hash006-60	bd43a887d71b7144844ad91174a26398b09644efce3714f6760deb4fec6994ff
+700000000-78	)(000un000hash007-78	e40b5dd2f20484b472c0c1a5d108a415e7443188765180e902f221350ac0c8ed
+800000000-86	)(000un000hash008-86	3aab0d646b2160bf5b95bc2b0a5e22972089c708fe3f9f56108a0f64b3b82b54
+900000000-94	)(000un000hash009-94	1b5a69678cd29073c44c3dda1616aeffd7be17347af355ffe6cbf896b61f08b1
+.               .                       .
+.               .                       .
+.               .                       .
+```
+
+In case the input instead of having `x` and `y`, has the check digits, fiddle will consider the values provided over the calculated ones, but will output a `*` to indicate the error.
+
+Say, `fiddle --mask ")(987un654hash321-xy"` takes instead of `)(001un671hash540-xy` or `)(001un671hash540-63` (which has the correct check digits), it receives `)(001un671hash540-91`,
+instead of outputting:
+
+``` bash
+045176100-63	)(001un671hash540-63	36ec01cc8c1df9f2b99c1f6b896eab611180d0ffc7cdda2009441f4aab2a6b44
+```
+
+It will output:
+
+``` bash
+045176100-63*	)(001un671hash540-91	5166741dd0b1b797e2bba6f27b2a1436c5e13fef5f225ea7666743f08d321a0e
+```
+
+
+## 📝 License
+
+This project is licensed. See the [LICENSE](LICENSE.md) file for more details.
