@@ -4,17 +4,6 @@
 
 > fiddle is a product of my boredom and a work in progress. I won't keep the README updated at the moment because I'm focusing on features, and since it's still in its infancy, the main branch is where development happens too. Currently, Fiddle is just a simple OCaml program to generate possible CPF numbers, calculate the correct check digits, and compute the hash of the CPF. It's like a Rainbow Table of CPFs. Not exactly useful.
 
-## Adjustments and improvements
-
-The project is still in development:
-
-- [x] Option for hash algorithm and length.
-- [x] Option for keyed hash or MAC, via the `FIDDLE_SECRET_KEY` environment variable.
-- [x] Reverse search, find a CPF from a hash.
-- [x] Verify if the input already has check digits, just confirm if they are correct.
-- [x] Mask processor, with the ability to dictate which format the CPF should use `xxx.xxx.xxx-xx`, `xxxxxxxxx-xx`, `xxxxxxxxxxx` and so on.
-- [ ] Support search through pre-computed hash tables
-
 ## 💻 Prerequisites
 
 Before starting, make sure you have met the following requirements:
@@ -35,7 +24,7 @@ I still need to write the installation functionality, generate a release, and so
 
 ## 🎻 Using fiddle
 
-# Basics
+### Basics
 
 To use fiddle, follow these steps:
 
@@ -107,7 +96,7 @@ There is also Taco Bell parallelism, but it's not working properly at the moment
 $ seq 200 | xargs -L 25 -P 8 fiddle
 ```
 
-# Masks
+### Masks
 
 `fiddle` also comes with `mascaml`, and supports masks. `mascaml` is a maskprocessor, that works similar to `hashcat`'s.
 Say for example, that whoever decide to make a database indexing by CPF hashes, decided to avoid pre-computed hashtables
