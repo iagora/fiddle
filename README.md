@@ -18,7 +18,9 @@ Before starting, make sure you have met the following requirements:
 
 To compile fiddle, follow these steps:
 
+``` bash
 $ dune build
+```
 
 I still need to write the installation functionality, generate a release, and so on.
 
