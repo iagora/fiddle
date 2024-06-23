@@ -2,12 +2,13 @@ type parameters = {
   hash : string;
   mac : string option;
   length : int;
-  mask_s : string option;
+  mask : string option;
   target : string option;
 }
 
 type config = { param : parameters; range : (int * int) option }
 type msg = Msg of string | Proc of config | Quit
+type task = Search | Inputs
 
 let cpu_count () =
   try
@@ -50,20 +51,21 @@ let calculate_ranges n_workers =
   in
   assign_ranges 0 []
 
+type t = { pid : int; out_chan : out_channel }
+
 module Worker = struct
   let worker_loop in_chan =
-    let config () =
-      let rec go f n_done =
-        let msg : msg = Marshal.from_channel in_chan in
-        match msg with
-        | Quit -> exit 0
-        | Proc _ -> failwith "Worker already received its configuration"
-        | Msg input ->
-            f input;
-            go f (n_done + 1)
-      in
+    let rec go f =
       let msg : msg = Marshal.from_channel in_chan in
       match msg with
+      | Quit -> exit 0
+      | Proc _ -> failwith "Worker already received its configuration"
+      | Msg input ->
+          f input;
+          go f
+    in
+    let config () =
+      match Marshal.from_channel in_chan with
       | Quit -> exit 0
       | Msg _ -> failwith "Worker has not received its configurations yet."
       | Proc load -> (
@@ -72,59 +74,94 @@ module Worker = struct
             | hash_alg, None -> Crypto.hash hash_alg load.param.length
             | _, Some mac_alg -> Crypto.mac mac_alg load.param.length
           in
-          match (load.param.mask_s, load.param.target) with
-          | Some _, Some _ -> failwith "Unimplemented"
-          | None, Some value ->
+          match (load.param.mask, load.param.target) with
+          | Some mask, Some value ->
               let open Core in
-              Mp.digest_to_cpf fn value (Option.value_exn load.range)
-          | None, None -> go (Mp.cpf_to_digest fn) 0
-          | _ -> failwith "Unimplemented")
+              Mp.digest_to_cpf_with_mask fn mask value
+                (Option.value_exn load.range)
+          | None, Some value -> (
+              let open Core in
+              match Mp.digest_to_cpf fn value (Option.value_exn load.range) with
+              | Some result ->
+                  Printf.printf "%s\n%!" result;
+                  exit 0
+              | None -> exit 0)
+          | None, None -> go (Mp.cpf_to_digest fn)
+          | Some mask, None -> go (Mp.cpf_to_digest_with_mask fn mask))
     in
     config ()
 
   let mk () =
     let in_fd, out_fd = Unix.pipe () in
-    let pid = Unix.fork () in
-    if pid = 0 then (
-      Unix.close out_fd;
-      let in_ch = Unix.in_channel_of_descr in_fd in
-      worker_loop in_ch |> ignore;
-      failwith "Unreachable")
-    else (
-      Unix.close in_fd;
-      let out_ch = Unix.out_channel_of_descr out_fd in
-      out_ch)
+    match Unix.fork () with
+    | 0 ->
+        Unix.close out_fd;
+        let in_ch = Unix.in_channel_of_descr in_fd in
+        worker_loop in_ch |> ignore;
+        failwith "Unreachable"
+    | pid ->
+        Unix.close in_fd;
+        let out_chan = Unix.out_channel_of_descr out_fd in
+        { pid; out_chan }
 
-  let send out_ch (msg : msg) =
-    Marshal.to_channel out_ch msg [];
-    flush out_ch
+  let send { pid; out_chan } (msg : msg) =
+    Marshal.to_channel out_chan msg [];
+    let _ = pid in
+    flush out_chan
+
+  let kill { pid; _ } = Unix.kill pid Sys.sigkill
+  let wait { pid; _ } = Unix.waitpid [] pid |> ignore
 end
+
+let handle_search workers =
+  let rec wait_for_completion () =
+    match Unix.wait () with
+    | pid, WEXITED 0 -> Some pid
+    | _ -> wait_for_completion ()
+  in
+  match wait_for_completion () with
+  | Some pid -> Array.iter (fun w -> if w.pid <> pid then Worker.kill w) workers
+  | None -> ()
+
+let handle_inputs workers =
+  let open Core in
+  let current_worker = ref 0 in
+  In_channel.fold_lines In_channel.stdin ~init:() ~f:(fun () line ->
+      Worker.send workers.(!current_worker) (Msg line);
+      current_worker := (!current_worker + 1) mod Array.length workers;
+      ());
+  Array.iter workers ~f:(fun w -> Worker.send w Quit);
+  Array.iter workers ~f:(fun w -> Worker.wait w)
 
 let fiddle params np =
   let n_cpus = cpu_count () in
   if np > n_cpus then
-    invalid_arg "Creating more processes than CPUs available is not allowed";
-  let tasks =
-    match (params.mask_s, params.target) with
-    | Some _, Some _ ->
-        let procs = calculate_ranges np in
-        List.map
-          (fun (x, y) -> Proc { param = params; range = Some (x, y) })
-          procs
-    | Some _, None -> failwith "not ready"
-    | None, Some _ -> 
-        let procs = calculate_ranges np in
-        List.map
-          (fun (x, y) -> Proc { param = params; range = Some (x, y) })
-          procs
-    | None, None -> failwith "not ready"
-  in
-  let workers = Array.init np (fun _ -> Worker.mk ()) in
-  let seed = 42 in
-  Random.init seed;
-  List.iteri
-    (fun idx t ->
-      let w = workers.(idx) in
-      Worker.send w t)
-    tasks;
-  Array.iter (fun w -> Worker.send w Quit) workers
+    invalid_arg "Creating more processes than CPUs available is not allowed"
+  else
+    let task_type, tasks =
+      match params.target with
+      | Some _ ->
+          let t = Search in
+          let procs = calculate_ranges np in
+          let l =
+            List.map
+              (fun (x, y) -> Proc { param = params; range = Some (x, y) })
+              procs
+          in
+          (t, l)
+      | None ->
+          let t = Inputs in
+          let l =
+            List.init np (fun _ -> Proc { param = params; range = None })
+          in
+          (t, l)
+    in
+    let workers = Array.init np (fun _ -> Worker.mk ()) in
+    List.iteri
+      (fun idx t ->
+        let w = workers.(idx) in
+        Worker.send w t)
+      tasks;
+    match task_type with
+    | Search -> handle_search workers
+    | Inputs -> handle_inputs workers

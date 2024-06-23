@@ -41,17 +41,19 @@ let fiddle =
      fun () ->
        let open Fiddle in
        if list_algs then Algs.list_algorithms ()
-       else if np > 2 then
+       else if np >= 2 && List.is_empty inputs then
          let params : Multiprocess.parameters =
            {
              hash = hash_algorithm;
              mac = mac_algorithm;
              length = digest_length;
-             mask_s = mask;
+             mask;
              target = value;
            }
          in
-         Multiprocess.fiddle params np
+         try Multiprocess.fiddle params np with
+         | Invalid_argument msg -> Printf.eprintf "Invalid Arguments: %s\n" msg
+         | Failure msg -> Printf.eprintf "Error: %s\n" msg
        else
          let fn =
            match (hash_algorithm, mac_algorithm) with
