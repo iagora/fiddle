@@ -5,7 +5,7 @@ let cpf_to_digest f n =
   let digits = Cpf.calculate_cpf_digits cpf_base in
   let cpf_str = Cpf.cpf_list_to_string cpf_base digits in
   let digest = f cpf_str in
-  Printf.printf "%s\t%s\n" cpf_str digest
+  Printf.printf "%s\t%s\n%!" cpf_str digest
 
 let digest_to_cpf f target_result (start, finish) =
   let rec search n =
@@ -140,7 +140,7 @@ let cpf_to_digest_with_mask f mask cpf_input =
   let digest = f cpf in
   let ast = if !flag then "*" else "" in
   let x, y = check_digits in
-  Printf.printf "%s-%d%d%s\t%s%s\t%s\n" extracted x y ast cpf ast digest
+  Printf.printf "%s-%d%d%s\t%s%s\t%s\n%!" extracted x y ast cpf ast digest
 
 let digest_to_cpf_with_mask f mask target_result (start, finish) =
   let open Core in
@@ -214,4 +214,4 @@ let digest_to_cpf_with_mask f mask target_result (start, finish) =
     |> String.of_char_list
   in
   let x, y = check in
-  Printf.printf "%s-%d%d\n" extracted x y
+  Printf.printf "%s-%d%d\n%!" extracted x y
