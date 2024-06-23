@@ -1,4 +1,5 @@
 (library
- (name lib)
+ (name fiddle)
+ (public_name fiddle)
  (ocamlopt_flags -O3)
- (libraries cryptokit core))
+ (libraries cryptokit core unix))

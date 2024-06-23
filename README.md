@@ -18,7 +18,9 @@ Before starting, make sure you have met the following requirements:
 
 To compile fiddle, follow these steps:
 
+``` bash
 $ dune build
+```
 
 I still need to write the installation functionality, generate a release, and so on.
 
@@ -90,11 +92,19 @@ $ fiddle -h md5 -u 823e99bf5f87df225fe8ce4c46340b73
 
 Which will result in: `000000003-53`.
 
-There is also Taco Bell parallelism, but it's not working properly at the moment:
+There is also some limited parallelism:
 
 ``` bash
-$ seq 200 | xargs -L 25 -P 8 fiddle
+$ seq 200 | fiddle -n 4
 ```
+
+This will spawn 4 child processes, that will receive tasks in a round robin fashion from stdin.
+Of course `mascaml` can also be used to pipe input in, more about masks below. However, it seems that 3x speed up is the
+max I can provide at the moment, that is achieved with `n = 4`, after that there is some bottleneck.
+However, when used in the reverse search `-u`, the speed up is directly proportional to the number
+of processes, but I limited the `n` you can set to the number of processors the CPU has.
+Careful though, the whole table of CPFs is upwards of 140GB, and it generates it fast.
+Which is why I'll be adding support to DBs at some point.
 
 ### Masks
 
@@ -153,7 +163,7 @@ instead of outputting:
 It will output:
 
 ``` bash
-045176100-63*	)(001un671hash540-91	5166741dd0b1b797e2bba6f27b2a1436c5e13fef5f225ea7666743f08d321a0e
+045176100-63*	)(001un671hash540-91*	5166741dd0b1b797e2bba6f27b2a1436c5e13fef5f225ea7666743f08d321a0e
 ```
 
 
