@@ -200,18 +200,19 @@ let digest_to_cpf_with_mask f mask target_result (start, finish) =
       if String.equal digest target_result then Some (cpf_str, check_digits)
       else search (n + 1)
   in
-  let cpf, check =
-    match search start with Some data -> data | None -> exit 0
-  in
-  let extracted =
-    String.to_list mask
-    |> List.mapi ~f:(fun idx char -> (char, cpf.[idx]))
-    |> List.filter ~f:(fun (char, _) ->
-           Char.is_digit char || Char.equal char 'x' || Char.equal char 'y')
-    |> List.sort ~compare:(fun (a, _) (b, _) -> Char.compare a b)
-    |> List.filter_map ~f:(fun (char, digit) ->
-           if Char.is_digit char then Some digit else None)
-    |> String.of_char_list
-  in
-  let x, y = check in
-  Printf.printf "%s-%d%d\n%!" extracted x y
+  match search start with
+  | None -> None
+  | Some (cpf, check) ->
+      let extracted =
+        String.to_list mask
+        |> List.mapi ~f:(fun idx char -> (char, cpf.[idx]))
+        |> List.filter ~f:(fun (char, _) ->
+               Char.is_digit char || Char.equal char 'x' || Char.equal char 'y')
+        |> List.sort ~compare:(fun (a, _) (b, _) -> Char.compare a b)
+        |> List.filter_map ~f:(fun (char, digit) ->
+               if Char.is_digit char then Some digit else None)
+        |> String.of_char_list
+      in
+      let x, y = check in
+      let result = Printf.sprintf "%s-%d%d\n%!" extracted x y in
+      Some result

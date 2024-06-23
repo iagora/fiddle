@@ -64,7 +64,7 @@ module Worker = struct
           f input;
           go f
     in
-    let config () =
+    let rec config () =
       match Marshal.from_channel in_chan with
       | Quit -> exit 0
       | Msg _ -> failwith "Worker has not received its configurations yet."
@@ -75,17 +75,23 @@ module Worker = struct
             | _, Some mac_alg -> Crypto.mac mac_alg load.param.length
           in
           match (load.param.mask, load.param.target) with
-          | Some mask, Some value ->
+          | Some mask, Some value -> (
               let open Core in
-              Mp.digest_to_cpf_with_mask fn mask value
-                (Option.value_exn load.range)
+              match
+                Mp.digest_to_cpf_with_mask fn mask value
+                  (Option.value_exn load.range)
+              with
+              | Some result ->
+                  Printf.printf "%s\n%!" result;
+                  exit 0
+              | None -> config ())
           | None, Some value -> (
               let open Core in
               match Mp.digest_to_cpf fn value (Option.value_exn load.range) with
               | Some result ->
                   Printf.printf "%s\n%!" result;
                   exit 0
-              | None -> exit 0)
+              | None -> config ())
           | None, None -> go (Mp.cpf_to_digest fn)
           | Some mask, None -> go (Mp.cpf_to_digest_with_mask fn mask))
     in
@@ -98,7 +104,7 @@ module Worker = struct
         Unix.close out_fd;
         let in_ch = Unix.in_channel_of_descr in_fd in
         worker_loop in_ch |> ignore;
-        failwith "Unreachable"
+        exit 1
     | pid ->
         Unix.close in_fd;
         let out_chan = Unix.out_channel_of_descr out_fd in
