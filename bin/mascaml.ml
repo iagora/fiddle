@@ -39,8 +39,7 @@ let print_combinations mask =
 
 (* Example usage *)
 let () =
-  if Array.length Sys.argv <> 2 then
-    prerr_endline "Usage: mascaml <mask>"
+  if Array.length Sys.argv <> 2 then prerr_endline "Usage: mascaml <mask>"
   else
     let mask = Sys.argv.(1) in
     print_combinations mask
