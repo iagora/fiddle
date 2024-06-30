@@ -1,23 +1,11 @@
-let cpu_count () =
-  try
-    match Sys.os_type with
-    | "Win32" -> int_of_string (Sys.getenv "NUMBER_OF_PROCESSORS")
-    | _ -> (
-        let i = Unix.open_process_in "getconf _NPROCESSORS_ONLN" in
-        let close () = ignore (Unix.close_process_in i) in
-        let ib = Scanf.Scanning.from_channel i in
-        try
-          Scanf.bscanf ib "%d" (fun n ->
-              close ();
-              n)
-        with e ->
-          close ();
-          raise e)
-  with
-  | Not_found | Sys_error _ | Failure _ | Scanf.Scan_failure _ | End_of_file
-  | Unix.Unix_error (_, _, _)
-  ->
-    1
+type t = {
+  hash : string;
+  mac : string option;
+  length : int;
+  mask : string;
+  target : string option;
+  np : int;
+}
 
 let calculate_ranges n_workers =
   (* Define the total search space *)
@@ -61,31 +49,38 @@ let handle_inputs workers =
   Array.iter workers ~f:(fun w -> Worker.send w Quit);
   Array.iter workers ~f:(fun w -> Worker.wait w)
 
-let fiddle params np = 
+let fiddle params = 
   let open Worker in
-  let n_cpus = cpu_count () in
-  if np > n_cpus then
+  let n_cpus = Util.cpu_count () in
+  if params.np > n_cpus then
     invalid_arg "Creating more processes than CPUs available is not allowed"
   else
+    let worker_config : parameters = {
+        hash = params.hash;
+        mac = params.mac;
+        length = params.length;
+        mask = params.mask;
+        target = params.target;
+    } in
     let task_type, tasks =
       match params.target with
       | Some _ ->
           let t = Search in
-          let procs = calculate_ranges np in
+          let procs = calculate_ranges params.np in
           let l =
             List.map
-              (fun (x, y) -> Proc { param = params; range = Some (x, y) })
+              (fun (x, y) -> Proc { param = worker_config; range = Some (x, y) })
               procs
           in
           (t, l)
       | None ->
           let t = Inputs in
           let l =
-            List.init np (fun _ -> Proc { param = params; range = None })
+            List.init params.np (fun _ -> Proc { param = worker_config; range = None })
           in
           (t, l)
     in
-    let workers = Array.init np (fun _ -> Worker.mk ()) in
+    let workers = Array.init params.np (fun _ -> Worker.mk ()) in
     List.iteri
       (fun idx t ->
         let w = workers.(idx) in

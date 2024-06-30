@@ -2,7 +2,7 @@ type parameters = {
   hash : string;
   mac : string option;
   length : int;
-  mask : string option;
+  mask : string;
   target : string option;
 }
 

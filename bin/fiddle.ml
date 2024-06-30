@@ -23,7 +23,7 @@ let fiddle =
            "LENGTH specify the digest length in bits for algorithms that have \
             varying length output"
      and mask =
-       flag "--mask" ~aliases:[ "-k" ] (optional string)
+       flag "--mask" ~aliases:[ "-k" ] (optional_with_default "123456789xy" string)
          ~doc:
            "MASK specify a mask as to guide the check insertion, and allow \
             permutations"
@@ -42,16 +42,17 @@ let fiddle =
        let open Fiddle in
        if list_algs then Algs.list_algorithms ()
        else if np >= 2 && List.is_empty inputs then
-         let params : Worker.parameters =
+         let params : Config.t =
            {
              hash = hash_algorithm;
              mac = mac_algorithm;
              length = digest_length;
              mask;
              target = value;
+             np;
            }
          in
-         try Multiprocess.fiddle params np with
+         try Config.fiddle params with
          | Invalid_argument msg -> Printf.eprintf "Invalid Arguments: %s\n" msg
          | Failure msg -> Printf.eprintf "Error: %s\n" msg
        else
@@ -60,39 +61,35 @@ let fiddle =
            | hash_alg, None -> Crypto.hash hash_alg digest_length
            | _, Some mac_alg -> Crypto.mac mac_alg digest_length
          in
-         match (mask, value) with
-         | Some mask, Some value -> (
-             try Maskproc.digest_to_cpf_with_mask fn mask value with
+         match value with
+         | Some value -> (
+             try match Cpf.digest_to_cpf fn mask (0, 999999999) value with 
+                 | Some result -> Printf.printf "%s" result
+                 | None -> ()
+             with
              | Invalid_argument msg ->
                  Printf.eprintf "Invalid Arguments: %s\n" msg
              | Failure msg -> Printf.eprintf "Error: %s\n" msg)
-         | None, Some value -> (
-             try Cpf.digest_to_cpf fn value
-             with Failure msg -> Printf.eprintf "Error: %s\n" msg)
-         | Some mask, None ->
+         | None ->
              if List.is_empty inputs then
                In_channel.fold_lines In_channel.stdin ~init:()
                  ~f:(fun () line ->
-                   try Maskproc.cpf_to_digest_with_mask fn mask line with
+                   try match Cpf.cpf_to_digest fn mask line with 
+                        | Some result -> Printf.printf "%s" result
+                        | None -> ()
+                   with
                    | Invalid_argument msg ->
                        Printf.eprintf "Invalid Arguments: %s\n" msg
                    | Failure msg -> Printf.eprintf "Error: %s\n" msg)
              else
                List.iter inputs ~f:(fun cpf ->
-                   try Maskproc.cpf_to_digest_with_mask fn mask cpf with
+                   try match Cpf.cpf_to_digest fn mask cpf with 
+                        | Some result -> Printf.printf "%s" result
+                        | None -> ()
+                   with
                    | Invalid_argument msg ->
                        Printf.eprintf "Invalid Arguments: %s\n" msg
-                   | Failure msg -> Printf.eprintf "Error: %s\n" msg)
-         | None, None ->
-             if List.is_empty inputs then
-               In_channel.fold_lines In_channel.stdin ~init:()
-                 ~f:(fun () line ->
-                   try Int.of_string line |> Cpf.cpf_to_digest fn
-                   with Failure msg -> Printf.eprintf "Error: %s\n" msg)
-             else
-               List.iter inputs ~f:(fun cpf ->
-                   try Int.of_string cpf |> Cpf.cpf_to_digest fn
-                   with Failure msg -> Printf.eprintf "Error: %s\n" msg))
+                   | Failure msg -> Printf.eprintf "Error: %s\n" msg))
 
 (*Entry point of the program *)
 let () = Command_unix.run fiddle

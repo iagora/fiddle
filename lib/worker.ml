@@ -2,7 +2,7 @@ type parameters = {
   hash : string;
   mac : string option;
   length : int;
-  mask : string option;
+  mask : string;
   target : string option;
 }
 
@@ -20,7 +20,9 @@ type t = { pid : int; out_chan : out_channel }
       | Quit -> exit 0
       | Proc _ -> failwith "Worker already received its configuration"
       | Msg input ->
-          f input;
+          match f input with
+          | Some result -> Printf.printf "%s%!" result
+          | None -> ();
           go f
     in
     let rec config () =
@@ -33,26 +35,18 @@ type t = { pid : int; out_chan : out_channel }
             | hash_alg, None -> Crypto.hash hash_alg load.param.length
             | _, Some mac_alg -> Crypto.mac mac_alg load.param.length
           in
-          match (load.param.mask, load.param.target) with
-          | Some mask, Some value -> (
+          match load.param.target with
+          | Some value -> (
               let open Core in
               match
-                Mp.digest_to_cpf_with_mask fn mask value
-                  (Option.value_exn load.range)
+                Cpf.digest_to_cpf fn load.param.mask (Option.value_exn load.range) value
+                 
               with
               | Some result ->
                   Printf.printf "%s\n%!" result;
                   exit 0
               | None -> config ())
-          | None, Some value -> (
-              let open Core in
-              match Mp.digest_to_cpf fn value (Option.value_exn load.range) with
-              | Some result ->
-                  Printf.printf "%s\n%!" result;
-                  exit 0
-              | None -> config ())
-          | None, None -> go (Mp.cpf_to_digest fn)
-          | Some mask, None -> go (Mp.cpf_to_digest_with_mask fn mask))
+          | None -> go (Cpf.cpf_to_digest fn load.param.mask))
     in
     config ()
 
