@@ -24,7 +24,8 @@
    dune
    (cryptokit (>= 1.19))
    (core (>= 0.17.1))
-   (core_unix (>= 0.17.0)))
+   (core_unix (>= 0.17.0))
+   (sqlite3 (= 5.1.0)))
  (tags
   (topics "to describe" your project)))
 

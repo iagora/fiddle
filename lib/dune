@@ -2,4 +2,4 @@
  (name fiddle)
  (public_name fiddle)
  (ocamlopt_flags -O3)
- (libraries cryptokit core unix))
+ (libraries cryptokit core unix sqlite3))

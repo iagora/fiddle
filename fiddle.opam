@@ -16,6 +16,7 @@ depends: [
   "cryptokit" {>= "1.19"}
   "core" {>= "0.17.1"}
   "core_unix" {>= "0.17.0"}
+  "sqlite3" {= "5.1.0"}
   "odoc" {with-doc}
 ]
 build: [
