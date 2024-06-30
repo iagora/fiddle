@@ -42,7 +42,7 @@ let fiddle =
        let open Fiddle in
        if list_algs then Algs.list_algorithms ()
        else if np >= 2 && List.is_empty inputs then
-         let params : Multiprocess.parameters =
+         let params : Worker.parameters =
            {
              hash = hash_algorithm;
              mac = mac_algorithm;

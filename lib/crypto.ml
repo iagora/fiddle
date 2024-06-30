@@ -2,21 +2,21 @@ open Core
 open Cryptokit
 
 (* Hash hex encodings *)
-let hash algorithm digest_length data =
+let hash algorithm length data =
   let hash_function =
     match algorithm with
-    | "sha3" -> Hash.sha3 digest_length
-    | "keccak" -> Hash.keccak digest_length
-    | "sha2" -> Hash.sha2 digest_length
+    | "sha3" -> Hash.sha3 length
+    | "keccak" -> Hash.keccak length
+    | "sha2" -> Hash.sha2 length
     | "sha224" -> Hash.sha224 ()
     | "sha256" -> Hash.sha256 ()
     | "sha384" -> Hash.sha384 ()
     | "sha512" -> Hash.sha512 ()
-    | "blake2b" -> Hash.blake2b digest_length
+    | "blake2b" -> Hash.blake2b length
     | "blake2b512" -> Hash.blake2b512 ()
-    | "blake2s" -> Hash.blake2s digest_length
+    | "blake2s" -> Hash.blake2s length
     | "blake2s256" -> Hash.blake2s256 ()
-    | "blake3" -> Hash.blake3 digest_length
+    | "blake3" -> Hash.blake3 length
     | "blake3_256" -> Hash.blake3_256 ()
     | "ripemd160" -> Hash.ripemd160 ()
     | "sha1" -> Hash.sha1 ()
