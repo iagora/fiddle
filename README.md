@@ -1,8 +1,19 @@
 # 🎻 fiddle
-
+  
 <img src="image.png" alt="Fiddle logo">
 
 > fiddle is a product of my boredom and a work in progress. I won't keep the README updated at the moment because I'm focusing on features, and since it's still in its infancy, the main branch is where development happens too. Currently, Fiddle is just a simple OCaml program to generate possible CPF numbers, calculate the correct check digits, and compute the hash of the CPF. It's like a Rainbow Table of CPFs. Not exactly useful.
+
+
+  ${\color{red}IN}$  $${\color{red}CASE}$$  $${\color{red}IT'S}$$  $${\color{red}NOT}$$  $${\color{red}CLEAR.}$$  $${\color{red}THIS}$$  $${\color{red}IS}$$  $${\color{red}A}$$  $${\color{red}MEME}$$  $${\color{red}REPO.}$$ 
+  
+  ${\color{red}DO}$ $${\color{red}NOT}$$ $${\color{red}USE}$$ $${\color{red}A}$$ $${\color{red}HASH}$$ $${\color{red}TO}$$ $${\color{red}"PROTECT"}$$ $${\color{red}SOCIAL}$$ $${\color{red}SECURITY}$$ $${\color{red}NUMBERS}$$ $${\color{red}OR}$$ $${\color{red}CPFs!}$$ 
+  
+  - YOU WANT AN ANONYMOUS INDEX -> KEYED HASHES;
+
+  - YOU WANT CONFIDENTIALITY -> AUTHENTICATED ENCRYPTION.
+  
+  - YOU WANT A CONFIDENTIAL BUT QUERYABLE COLUMN -> AUTHENTICATED ENCRYPTION WITH SYNTHETIC IV;
 
 ## 💻 Prerequisites
 
